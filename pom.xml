@@ -5,7 +5,7 @@
 
     <groupId>org.lambadaframework</groupId>
     <artifactId>lambada</artifactId>
-    <version>0.0.5</version>
+    <version>0.0.8-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
@@ -163,6 +163,11 @@
                         </executions>
                         <inherited>true</inherited>
                     </plugin>
+                    <plugin>
+				      <groupId>org.codehaus.mojo</groupId>
+				      <artifactId>versions-maven-plugin</artifactId>
+				      <version>2.3</version>
+      				</plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
