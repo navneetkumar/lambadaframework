@@ -1,4 +1,4 @@
-package org.lambadaframework.example.runtime;
+package org.lambadaframework.example.controllers;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +12,7 @@ import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.eclipse.jetty.webapp.WebXmlConfiguration;
 import org.glassfish.jersey.server.spring.SpringWebApplicationInitializer;
-import org.lambadaframework.example.controllers.SpringConfig;
+import org.lambadaframework.example.runtime.LambdaRunnable;
 import org.springframework.web.WebApplicationInitializer;
 
 public class LambdaRunnableImp implements LambdaRunnable {
