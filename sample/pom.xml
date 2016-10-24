@@ -87,10 +87,30 @@
 		</dependency>
 		
 		<dependency>
-	  		<groupId>org.eclipse.jetty</groupId>
-	  		<artifactId>jetty-server</artifactId>
-	  		<version>9.4.0.RC0</version>
-  		</dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-webapp</artifactId>
+			<version>9.0.3.v20130506</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-util</artifactId>
+			<version>9.0.3.v20130506</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-servlet</artifactId>
+			<version>9.0.3.v20130506</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-server</artifactId>
+			<version>9.0.3.v20130506</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-annotations</artifactId>
+			<version>9.0.3.v20130506</version>
+		</dependency>
     </dependencies>
     
     <build>
