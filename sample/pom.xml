@@ -25,16 +25,26 @@
          <spring.version>4.3.0.RELEASE</spring.version>
     </properties>
     <dependencies>
-        <dependency>
-            <groupId>org.lambadaframework</groupId>
-            <artifactId>runtime</artifactId>
-            <version>${lambada.version}</version>
-        </dependency>
+    	<dependency>
+	  		<groupId>com.amazonaws</groupId>
+	  		<artifactId>aws-java-sdk-lambda</artifactId>
+	  		<version>1.11.9</version>
+  		</dependency>
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-lambda-java-log4j</artifactId>
             <version>1.0.0</version>
         </dependency>
+        <dependency>
+  			<groupId>log4j</groupId>
+  			<artifactId>log4j</artifactId>
+  			<version>1.2.17</version>
+  		</dependency>
+  		 <dependency>
+  			<groupId>com.amazonaws</groupId>
+  			<artifactId>aws-lambda-java-core</artifactId>
+  			<version>1.1.0</version>
+  		</dependency>
         <dependency>
 			<groupId>org.glassfish.jersey.ext</groupId>
 			<artifactId>jersey-spring3</artifactId>
@@ -109,6 +119,17 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-annotations</artifactId>
+			<version>9.0.3.v20130506</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.eclipse.jetty.orbit</groupId>
+					<artifactId>javax.annotation</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-client</artifactId>
 			<version>9.0.3.v20130506</version>
 		</dependency>
     </dependencies>

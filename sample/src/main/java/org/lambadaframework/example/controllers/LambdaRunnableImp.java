@@ -6,6 +6,7 @@ import java.io.IOException;
 import org.eclipse.jetty.annotations.AnnotationConfiguration;
 import org.eclipse.jetty.annotations.ClassInheritanceHandler;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.eclipse.jetty.util.MultiMap;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.Configuration;
@@ -13,32 +14,36 @@ import org.eclipse.jetty.webapp.WebAppContext;
 import org.eclipse.jetty.webapp.WebXmlConfiguration;
 import org.glassfish.jersey.server.spring.SpringWebApplicationInitializer;
 import org.lambadaframework.example.runtime.LambdaRunnable;
+import org.lambadaframework.example.controllers.JerseyConfig;
 import org.springframework.web.WebApplicationInitializer;
 
 public class LambdaRunnableImp implements LambdaRunnable {
 	
-	private static final String WAR = "src/main/java";
 	private static final String CONTEXT_PATH = "/";
-	private static final String TARGET = "target";
+
 
 	@Override
-	public WebAppContext getContext() {
+	public AbstractHandler getHandler() {
+//		return new HelloHandler();
+//		WebAppContext webapp = new WebAppContext();
+		
 		final WebAppContext webapp = new WebAppContext() {
             @Override
             public Resource getWebInf() throws IOException {
-                return newResource(TARGET);
+                return newResource("target");
             }
         };
+	
         webapp.setThrowUnavailableOnStartupException(true);
-        webapp.setWar(WAR);
         webapp.setContextPath(CONTEXT_PATH);
         webapp.setParentLoaderPriority(true);
-        webapp.setResourceBase(TARGET + CONTEXT_PATH);
+
         
         webapp.setConfigurations(new Configuration[] {
                 new WebXmlConfiguration(),
                 new Servlet3AnnotationConfiguration(SpringConfig.class,
                         SpringWebApplicationInitializer.class) });
+        webapp.setClassLoader(Thread.currentThread().getContextClassLoader());
         		
 		return webapp;
 	}
