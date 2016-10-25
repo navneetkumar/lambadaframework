@@ -22,7 +22,7 @@ public class Handler implements RequestStreamHandler {
 	
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context)
             throws IOException {
-    	System.out.println("Initializing Handler"); 
+    	System.out.println("Initializing New Handler"); 
         try {
         	logger.debug("sending new http request");
         	JettyTestServer.ensureStarted(new LambdaRunnableImp());
