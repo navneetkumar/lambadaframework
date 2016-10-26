@@ -25,14 +25,7 @@ public class Main {
     {        
 		System.out.println("Starting Testing");
 		Handler handler = new Handler();
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
-		
-		Properties props = new Properties();
-		props.load(Thread.currentThread().getContextClassLoader().getResource("lambda.properties").openStream());
-		String runnableClass = props.getProperty("deployment.lambdaRunnabe");
-		System.out.println("Got the lambda class = " + runnableClass);
-		
-		
+		ByteArrayOutputStream output = new ByteArrayOutputStream();	
 		handler.handleRequest(getInput(), output, getContext());
 		System.out.println("Got output from = " + output.toString());
     }
