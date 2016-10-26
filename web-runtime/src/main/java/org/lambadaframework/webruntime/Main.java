@@ -14,7 +14,7 @@ public class Main {
 
 	public static void main( String[] args ) throws Exception
     {        
-		System.out.println("Starting Testing");
+		System.out.println("Starting Testing from WebRuntime library");
 		Handler handler = new Handler();
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		

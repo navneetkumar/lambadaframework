@@ -53,6 +53,7 @@
         <module>lambada-maven-plugin</module>
         <module>wagon</module>
         <module>sample</module>
+        <module>web-runtime</module>
     </modules>
 
     <dependencies>

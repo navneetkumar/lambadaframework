@@ -5,17 +5,15 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.glassfish.jersey.servlet.ServletProperties;
-import org.lambadaframework.example.runtime.LambdaRunnable;
+import org.lambadaframework.webruntime.LambdaRunnable;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
 
-public class LambdaRunnableImp implements LambdaRunnable {
-
+public class WebRunnableImp implements LambdaRunnable {
 	@Override
 	public AbstractHandler getHandler() {
-		
-		System.out.println("########### Loading LambdaRunnnable ############");
+		System.out.println("########### Loading WebRunnable ############");
  		final ServletContextHandler servletHandler = new ServletContextHandler();
  		// Spring
  		final AnnotationConfigWebApplicationContext springContext = new AnnotationConfigWebApplicationContext();
