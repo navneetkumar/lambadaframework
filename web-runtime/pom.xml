@@ -6,7 +6,6 @@
     <version>0.0.8-SNAPSHOT</version>
   </parent>
   <artifactId>web-runtime</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
   <dependencies>
     	<dependency>
 	  		<groupId>com.amazonaws</groupId>

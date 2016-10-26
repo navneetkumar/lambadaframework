@@ -1,5 +1,6 @@
 package org.lambadaframework.webruntime;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -15,17 +16,20 @@ public class EchoHandler implements RequestStreamHandler {
 	static final Logger logger = Logger.getLogger(EchoHandler.class);
 	
 	
-    public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context)
-            throws IOException {
-    	System.out.println("Initializing Echo Handler"); 
-    	int letter;
-        while((letter = inputStream.read()) != -1)
-        {
-            outputStream.write(Character.toUpperCase(letter));
-        }
-        System.out.println("Context = " + context.toString()); 
-        outputStream.write(context.toString().getBytes(Charset.forName("UTF-8")));
-        
-    }
+	 public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
+	    	System.out.println("Initializing Light Echo Handler"); 
+	    	System.out.println("Got Context = " + context.toString()); 
+	    	
+	    	ByteArrayOutputStream result = new ByteArrayOutputStream();
+	    	byte[] buffer = new byte[1024];
+	    	int length;
+	    	while ((length = input.read(buffer)) != -1) {
+	    	    result.write(buffer, 0, length);
+	    	}
+	    	String inputString = result.toString("UTF-8");
+	    	System.out.println("Received input  = " + inputString); 
+	    	output.write(inputString.getBytes(Charset.forName("UTF-8")));   
+	        System.out.println("Echo Handler ended"); 
+	    }
     
 }
