@@ -1,0 +1,57 @@
+{
+	"resource": "/{proxy+}",
+	"path": "/api/provisioning/pairingcodes/KQ9JH",
+	"httpMethod": "GET",
+	"headers": {
+		"Accept": "*/*",
+		"Accept-Encoding": "gzip, deflate, sdch, br",
+		"Accept-Language": "en-US,en;q=0.8,hi;q=0.6",
+		"Cache-Control": "no-cache",
+		"CloudFront-Forwarded-Proto": "https",
+		"CloudFront-Is-Desktop-Viewer": "true",
+		"CloudFront-Is-Mobile-Viewer": "false",
+		"CloudFront-Is-SmartTV-Viewer": "false",
+		"CloudFront-Is-Tablet-Viewer": "false",
+		"CloudFront-Viewer-Country": "IN",
+		"Content-Type": "application/json",
+		"Host": "8kirfzbblg.execute-api.us-east-1.amazonaws.com",
+		"Postman-Token": "88cff761-4aa6-006c-9282-0d747dee83c9",
+		"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36",
+		"Via": "1.1 c55be57cb1e5f6fecca7e3cdd3798196.cloudfront.net (CloudFront)",
+		"X-Amz-Cf-Id": "0I461Y6hpLyBwNDgTf1IoO4QRxv3-R9rQh8J9oW-p7iz0fVyaKgB3Q==",
+		"X-Forwarded-For": "223.227.51.1, 54.239.160.6",
+		"X-Forwarded-Port": "443",
+		"X-Forwarded-Proto": "https"
+	},
+	"queryStringParameters": {
+		"pairingKey": "vX8m0xShGagOdpThMPSgEPc6A8tfXxBudeDcPdAj4dgjpw6Fm8qyd3eEJB8DERXf7JzxblM4HCFIoX0Y8PCrDtIljpxcFGiwVsXwoQV7JXBEALlAhrd86k4hBWzyBLI5ruRvmiB6CuevZLCrwONw2iVo7Y162Apg1GqPoYKC6TnCf4S7FhuXqrULPK5QZPunE4NdKyn1TzE4IxbxtAHPBbmQHXP160asMd5TCNf0XBmm4XltRkGm00XZx7Xi33xc"
+	},
+	"pathParameters": {
+		"proxy": "api/provisioning/pairingcodes/KQ9JH"
+	},
+	"stageVariables": null,
+	"requestContext": {
+		"accountId": "334342656483",
+		"resourceId": "33es1u",
+		"stage": "prod",
+		"requestId": "974fb9aa-9d39-11e6-a47d-cfcaca487106",
+		"identity": {
+			"cognitoIdentityPoolId": null,
+			"accountId": null,
+			"cognitoIdentityId": null,
+			"caller": null,
+			"apiKey": null,
+			"sourceIp": "223.227.51.1",
+			"accessKey": null,
+			"cognitoAuthenticationType": null,
+			"cognitoAuthenticationProvider": null,
+			"userArn": null,
+			"userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36",
+			"user": null
+		},
+		"resourcePath": "/{proxy+}",
+		"httpMethod": "GET",
+		"apiId": "8kirfzbblg"
+	},
+	"body": null
+}

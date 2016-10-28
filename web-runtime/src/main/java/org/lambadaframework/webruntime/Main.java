@@ -17,7 +17,6 @@ public class Main {
 		System.out.println("Starting Testing from WebRuntime library");
 		Handler handler = new Handler();
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
-		
 		handler.handleRequest(getInput(), output, getContext());
 		System.out.println("Got output from = " + output.toString());
     }
@@ -82,21 +81,11 @@ public class Main {
         };
     }
 	
+	private static String getRequestFile() {
+		return "sample-post.json";
+	}
+	
 	private static InputStream getInput() throws Exception {
-		String request = "{\n" +
-                "  \"package\": \"org.lambadaframework\",\n" +
-                "  \"pathTemplate\": \"/{id}\",\n" +
-                "  \"method\": \"GET\",\n" +
-                "  \"requestBody\": {},\n" +
-                "  \"path\": {\n" +
-                "    \"id\": \"123\"\n" +
-                "  },\n" +
-                "  \"querystring\": {\n" +
-                "        \"query1\": \"test3\",\n" +
-                "    \"query2\": \"test\"\n" +
-                "  },\n" +
-                "  \"header\": {}\n" +
-                "}";
-		return new ByteArrayInputStream( request.getBytes() );
+		return Thread.currentThread().getContextClassLoader().getResourceAsStream(getRequestFile());
     }
 }

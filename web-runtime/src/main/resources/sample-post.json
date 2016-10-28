@@ -1,0 +1,56 @@
+{
+	"resource": "/{proxy+}",
+	"path": "/api/provisioning/pairingcodes/random",
+	"httpMethod": "POST",
+	"headers": {
+		"Accept": "*/*",
+		"Accept-Encoding": "gzip, deflate, br",
+		"Accept-Language": "en-US,en;q=0.8,hi;q=0.6",
+		"Cache-Control": "no-cache",
+		"CloudFront-Forwarded-Proto": "https",
+		"CloudFront-Is-Desktop-Viewer": "true",
+		"CloudFront-Is-Mobile-Viewer": "false",
+		"CloudFront-Is-SmartTV-Viewer": "false",
+		"CloudFront-Is-Tablet-Viewer": "false",
+		"CloudFront-Viewer-Country": "IN",
+		"Content-Type": "application/json",
+		"Host": "8kirfzbblg.execute-api.us-east-1.amazonaws.com",
+		"Origin": "chrome-extension://aicmkgpgakddgnaphhhpliifpcfhicfo",
+		"Postman-Token": "b25db1c6-0928-985f-26f7-6c006342c050",
+		"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36",
+		"Via": "1.1 a9333b64ff80cfb8bcd5aee0a9319956.cloudfront.net (CloudFront)",
+		"X-Amz-Cf-Id": "TVnr8p3M-BCgcHp3y8P8CIX6BF8rgLQa2tYa3DoHZCIpRpqrMiJzBQ==",
+		"X-Forwarded-For": "223.227.51.1, 54.239.160.79",
+		"X-Forwarded-Port": "443",
+		"X-Forwarded-Proto": "https"
+	},
+	"queryStringParameters": null,
+	"pathParameters": {
+		"proxy": "api/provisioning/pairingcodes/random"
+	},
+	"stageVariables": null,
+	"requestContext": {
+		"accountId": "334342656483",
+		"resourceId": "33es1u",
+		"stage": "prod",
+		"requestId": "4db96103-9d39-11e6-85b1-37a59c386789",
+		"identity": {
+			"cognitoIdentityPoolId": null,
+			"accountId": null,
+			"cognitoIdentityId": null,
+			"caller": null,
+			"apiKey": null,
+			"sourceIp": "223.227.51.1",
+			"accessKey": null,
+			"cognitoAuthenticationType": null,
+			"cognitoAuthenticationProvider": null,
+			"userArn": null,
+			"userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36",
+			"user": null
+		},
+		"resourcePath": "/{proxy+}",
+		"httpMethod": "POST",
+		"apiId": "8kirfzbblg"
+	},
+	"body": "{\n  \"grantType\" : \"client_credentials\"\n}"
+}

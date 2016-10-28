@@ -9,9 +9,12 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
+import org.eclipse.jetty.client.api.Request;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.eclipse.jetty.client.HttpRequest;
 
 
 
@@ -35,7 +38,7 @@ public class Handler implements RequestStreamHandler {
         	logger.debug("starting server with runnable class");
         	JettyTestServer.ensureStarted(runnableInstance);
         	logger.debug("sending request to local server ");
-			sendRequest(outputStream);
+        	proxyRequest(inputStream,outputStream);
 		} catch (Exception e) {
 			logger.debug("Handling request failed = " + e.getLocalizedMessage());
 			e.printStackTrace();
@@ -43,15 +46,30 @@ public class Handler implements RequestStreamHandler {
     }
     
     
-    public void sendRequest(OutputStream outputStream) throws Exception {
+    public void proxyRequest(InputStream inputStream, OutputStream outputStream) throws Exception {
     	HttpClient httpClient = new HttpClient();
     	httpClient.setFollowRedirects(false);
     	httpClient.start();
     	logger.debug("sending request to server = " + JettyTestServer.BASEURL);
-    	ContentResponse r = httpClient.GET(JettyTestServer.BASEURL);
-    	String response =  r.getContentAsString();
-    	logger.debug("http response = " + response);
-    	outputStream.write(response.getBytes(Charset.forName("UTF-8")));
+    	
+    	
+    	ObjectMapper mapper = new ObjectMapper();
+    	APIRequest apiRequest = (APIRequest) mapper.readValue(inputStream, APIRequest.class);
+    	System.out.println("Received request  = " + apiRequest.toString());
+	
+    	
+    	Request jettyRequest = httpClient.newRequest(JettyTestServer.BASEURL);
+    	Request newRequest = apiRequest.copyRequest(jettyRequest);    	
+    	ContentResponse jettyResponse = newRequest.send();
+    	
+    	
+    	APIResponse apiResponse =  new APIResponse(jettyResponse);
+    	logger.debug("http response = " + apiResponse.toString());
+    	
+    	String jsonResponse = mapper.writeValueAsString(apiResponse);
+    	logger.debug("json response = " + apiResponse.toString());
+    	
+    	outputStream.write(jsonResponse.getBytes(Charset.forName("UTF-8")));
   
     }
 
