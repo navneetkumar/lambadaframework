@@ -50,7 +50,7 @@ public class LambadaDeployer extends AbstractMojoPlugin {
 
             Deployment deployment = getDeployment();
             printLogo();
-            getLog().info("Deployment to AWS Lambda and Gateway is starting.");
+            getLog().info("Updated Deployment to AWS Lambda and Gateway is starting.");
 
             checkRegion(regionToDeploy);
             getLog().info("Group Id: " + mavenProject.getGroupId());
@@ -69,17 +69,17 @@ public class LambadaDeployer extends AbstractMojoPlugin {
             /**
              * Set up VPC of Lambda, create new version
              */
-            getLog().info("LAMBDA");
-            LambdaFunction lambdaFunction = new LambdaFunction(cloudFormationOutput.getLambdaFunctionArn(), deployment);
-            lambdaFunction.setLog(getLog());
-            String functionArn = lambdaFunction.deployLatestVersion();
-            getLog().info(LOG_SEPERATOR);
-
-            getLog().info("API GATEWAY");
-            ApiGateway apiGateway = new ApiGateway(deployment, functionArn, cloudFormationOutput.getLambdaExecutionRole());
-            apiGateway.setLog(getLog());
-            apiGateway.deployEndpoints();
-            getLog().info(LOG_SEPERATOR);
+//            getLog().info("LAMBDA");
+//            LambdaFunction lambdaFunction = new LambdaFunction(cloudFormationOutput.getLambdaFunctionArn(), deployment);
+//            lambdaFunction.setLog(getLog());
+//            String functionArn = lambdaFunction.deployLatestVersion();
+//            getLog().info(LOG_SEPERATOR);
+//
+//            getLog().info("API GATEWAY");
+//            ApiGateway apiGateway = new ApiGateway(deployment, functionArn, cloudFormationOutput.getLambdaExecutionRole());
+//            apiGateway.setLog(getLog());
+//            apiGateway.deployEndpoints();
+//            getLog().info(LOG_SEPERATOR);
 
 
         } catch (Exception e) {
