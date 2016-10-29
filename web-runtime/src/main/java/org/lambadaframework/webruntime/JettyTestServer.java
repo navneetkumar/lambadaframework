@@ -15,7 +15,7 @@ public class JettyTestServer {
 	
 	public static void ensureStarted(LambdaRunnable web) throws IOException {
 		logger.debug("attempting to start server");
-//		 if (JettyTestServer.isRunning) {
+		 if (JettyTestServer.isRunning) {
 			 logger.debug("Jetty was not running. Starting Jetty...");
 			 jetty = new Server(PORT);
 			 AbstractHandler handler = web.getHandler();
@@ -30,10 +30,10 @@ public class JettyTestServer {
 		            System.out.println("Crumbs!");
 		            e.printStackTrace();
 		        }
-//		 }
-//		 else {
-//			 logger.debug("Server is already running");
-//		 }
+		 }
+		 else {
+			 logger.debug("Server is already running");
+		 }
 		 
 	}
 	
