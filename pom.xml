@@ -188,15 +188,16 @@
             </build>
         </profile>
     </profiles>
-
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
+	<distributionManagement>
         <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <id>bluejeans</id>
+            <name>Blue Jeans Nexus</name>
+            <url>http://10.4.7.155:8081/nexus/content/repositories/releases/</url>
         </repository>
+        <snapshotRepository>
+            <id>bluejeans</id>
+            <name>Blue Jeans Nexus</name>
+            <url>http://10.4.7.155:8081/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
     </distributionManagement>
 </project>
