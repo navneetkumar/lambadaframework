@@ -1,0 +1,499 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "",
+    "Parameters": {
+        "Project": {
+            "Description": "Project Name",
+            "Type": "String",
+            "MinLength": "1"
+        },
+        "Stage": {
+            "Description": "Stage Name",
+            "Type": "String",
+            "MinLength": "1"
+        },
+        "LambdaMemorySize": {
+            "Type": "Number",
+            "Default": "128",
+            "Description": "AWS Lambda Function Maximum Allowed Memory."
+        },
+        "LambdaMaximumExecutionTime": {
+            "Type": "Number",
+            "Default": "3",
+            "Description": "AWS Lambda Function Maximum Execution Time (seconds)."
+        },
+        "DeploymentS3Bucket": {
+            "Description": "Deployment S3 Bucket is where project is deployed after mvn deploy command.",
+            "Type": "String",
+            "MinLength": "3",
+            "MaxLength": "63"
+        },
+        "DeploymentS3Key": {
+            "Description": "Deployment S3 Key is the S3 Path where project is deployed after mvn deploy command.",
+            "Type": "String",
+            "MinLength": "1"
+        },
+        "LambdaDescription": {
+            "Description": "Lambda Description",
+            "Type": "String",
+            "MinLength": "1"
+        },
+        "LambdaExecutionRoleManagedPolicyARNs": {
+            "Description": "Managed Policy ARNs for Lambda Execution IAM Role",
+            "Type": "CommaDelimitedList",
+            "Default": "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+        },
+        "SecurityGroupIds": {
+            "Description": "Lambda VPC Security Group Ids",
+            "Type": "CommaDelimitedList",
+            "Default": ""
+        },
+        "SubnetIds": {
+            "Description": "Lambda VPC Subnet Ids",
+            "Type": "CommaDelimitedList",
+            "Default": ""
+        }
+    },
+    "Conditions": {
+        "UseVpcForLambda": {
+            "Fn::Not": [
+                {
+                    "Fn::And": [
+                        {
+                            "Fn::Equals": [
+                                {
+                                    "Fn::Join": [
+                                        ",",
+                                        {
+                                            "Ref": "SubnetIds"
+                                        }
+                                    ]
+                                },
+                                ""
+                            ]
+                        },
+                        {
+                            "Fn::Equals": [
+                                {
+                                    "Fn::Join": [
+                                        ",",
+                                        {
+                                            "Ref": "SecurityGroupIds"
+                                        }
+                                    ]
+                                },
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "Mappings": {},
+    "Resources": {
+        "LambadaExecutionRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "lambda.amazonaws.com",
+                                    "apigateway.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "ManagedPolicyArns": {
+                    "Ref": "LambdaExecutionRoleManagedPolicyARNs"
+                }
+            }
+        },
+        "LambadaExecutionPolicy": {
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "PolicyName": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            {
+                                "Ref": "Stage"
+                            },
+                            {
+                                "Ref": "Project"
+                            },
+                            "lambda"
+                        ]
+                    ]
+                },
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "ec2:CreateNetworkInterface",
+                                "ec2:DescribeNetworkInterfaces",
+                                "ec2:DeleteNetworkInterface"
+                            ],
+                            "Resource": "*"
+                        },
+                        {
+                            "Action": [
+                                "logs:CreateLogGroup",
+                                "logs:CreateLogStream",
+                                "logs:PutLogEvents"
+                            ],
+                            "Effect": "Allow",
+                            "Resource": "arn:aws:logs:*"
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "lambda:InvokeFunction"
+                            ],
+                            "Resource": [
+                                "*"
+                            ]
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "apigateway:*",
+                                "iam:PassRole"
+                            ],
+                            "Resource": [
+                                "*"
+                            ]
+                        }
+                    ]
+                },
+                "Roles": [
+                    {
+                        "Ref": "LambadaExecutionRole"
+                    }
+                ]
+            }
+        },
+        "LambdaPermissionForApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "LambdaFunction",
+                        "Arn"
+                    ]
+                },
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "arn:aws:execute-api:",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                                "Ref": "AWS::AccountId"
+                            },
+                            ":*"
+                        ]
+                    ]
+                }
+            }
+        },
+        "LambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Handler": "org.lambadaframework.runtime.Handler",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "LambadaExecutionRole",
+                        "Arn"
+                    ]
+                },
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "DeploymentS3Bucket"
+                    },
+                    "S3Key": {
+                        "Ref": "DeploymentS3Key"
+                    }
+                },
+                "Runtime": "java8",
+                "Timeout": {
+                    "Ref": "LambdaMaximumExecutionTime"
+                },
+                "MemorySize": {
+                    "Ref": "LambdaMemorySize"
+                },
+                "Description": {
+                    "Ref": "LambdaDescription"
+                },
+                "VpcConfig": {
+                    "Fn::If": [
+                        "UseVpcForLambda",
+                        {
+                            "SecurityGroupIds": {
+                                "Fn::If": [
+                                    "UseVpcForLambda",
+                                    {
+                                        "Ref": "SecurityGroupIds"
+                                    },
+                                    {
+                                        "Ref": "AWS::NoValue"
+                                    }
+                                ]
+                            },
+                            "SubnetIds": {
+                                "Fn::If": [
+                                    "UseVpcForLambda",
+                                    {
+                                        "Ref": "SubnetIds"
+                                    },
+                                    {
+                                        "Ref": "AWS::NoValue"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
+                }
+            }
+        },
+        "ApiGatewayApi": {
+            "Type": "AWS::ApiGateway::RestApi",
+            "Properties": {
+                "Description": "AWS Lambada API",
+                "Body": {
+                    "swagger": "2.0",
+                    "info": {
+                        "version": "2016-10-17T09:17:50Z",
+                        "title": {
+                            "Ref": "Project"
+                        }
+                    },
+                    "basePath": "/prod",
+                    "schemes": [
+                        "https"
+                    ],
+                    "paths": {
+                        "/": {
+                            "options": {
+                                "consumes": [
+                                    "application/json"
+                                ],
+                                "produces": [
+                                    "application/json"
+                                ],
+                                "responses": {
+                                    "200": {
+                                        "description": "200 response",
+                                        "schema": {
+                                            "$ref": "#/definitions/Empty"
+                                        },
+                                        "headers": {
+                                            "Access-Control-Allow-Origin": {
+                                                "type": "string"
+                                            },
+                                            "Access-Control-Allow-Methods": {
+                                                "type": "string"
+                                            },
+                                            "Access-Control-Allow-Headers": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                },
+                                "x-amazon-apigateway-integration": {
+                                    "passthroughBehavior": "when_no_match",
+                                    "requestTemplates": {
+                                        "application/json": "{\"statusCode\": 200}"
+                                    },
+                                    "responses": {
+                                        "default": {
+                                            "statusCode": "200",
+                                            "responseParameters": {
+                                                "method.response.header.Access-Control-Allow-Methods": "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'",
+                                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
+                                                "method.response.header.Access-Control-Allow-Origin": "'https://example.com'"
+                                            }
+                                        }
+                                    },
+                                    "type": "mock"
+                                }
+                            },
+                            "x-amazon-apigateway-any-method": {
+                                "produces": [
+                                    "application/json"
+                                ],
+                                "responses": {
+                                    "200": {
+                                        "description": "200 response",
+                                        "schema": {
+                                            "$ref": "#/definitions/Empty"
+                                        }
+                                    }
+                                },
+                                "x-amazon-apigateway-integration": {
+                                    "uri": {
+                                        "Fn::Join": [
+                                            "",
+                                            [
+                                                "arn:aws:apigateway:",
+                                                {
+                                                    "Ref": "AWS::Region"
+                                                },
+                                                ":lambda:path/2015-03-31/functions/",
+                                                {
+                                                    "Fn::GetAtt": [
+                                                        "LambdaFunction",
+                                                        "Arn"
+                                                    ]
+                                                },
+                                                ":${stageVariables.functionAlias}/invocations"
+                                            ]
+                                        ]
+                                    },
+                                    "passthroughBehavior": "when_no_match",
+                                    "httpMethod": "POST",
+                                    "responses": {
+                                        "default": {
+                                            "statusCode": "200"
+                                        }
+                                    },
+                                    "type": "aws_proxy"
+                                }
+                            }
+                        },
+                        "/{proxy+}": {
+                            "options": {
+                                "consumes": [
+                                    "application/json"
+                                ],
+                                "produces": [
+                                    "application/json"
+                                ],
+                                "responses": {
+                                    "200": {
+                                        "description": "200 response",
+                                        "schema": {
+                                            "$ref": "#/definitions/Empty"
+                                        },
+                                        "headers": {
+                                            "Access-Control-Allow-Origin": {
+                                                "type": "string"
+                                            },
+                                            "Access-Control-Allow-Methods": {
+                                                "type": "string"
+                                            },
+                                            "Access-Control-Allow-Headers": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                },
+                                "x-amazon-apigateway-integration": {
+                                    "passthroughBehavior": "when_no_match",
+                                    "requestTemplates": {
+                                        "application/json": "{\"statusCode\": 200}"
+                                    },
+                                    "responses": {
+                                        "default": {
+                                            "statusCode": "200",
+                                            "responseParameters": {
+                                                "method.response.header.Access-Control-Allow-Methods": "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'",
+                                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
+                                                "method.response.header.Access-Control-Allow-Origin": "'https://example.com'"
+                                            }
+                                        }
+                                    },
+                                    "type": "mock"
+                                }
+                            },
+                            "x-amazon-apigateway-any-method": {
+                                "parameters": [
+                                    {
+                                        "name": "proxy",
+                                        "in": "path",
+                                        "required": true,
+                                        "type": "string"
+                                    }
+                                ],
+                                "responses": {},
+                                "x-amazon-apigateway-integration": {
+                                    "uri": {
+                                        "Fn::Join": [
+                                            "",
+                                            [
+                                                "arn:aws:apigateway:",
+                                                {
+                                                    "Ref": "AWS::Region"
+                                                },
+                                                ":lambda:path/2015-03-31/functions/",
+                                                {
+                                                    "Fn::GetAtt": [
+                                                        "LambdaFunction",
+                                                        "Arn"
+                                                    ]
+                                                },
+                                                ":${stageVariables.functionAlias}/invocations"
+                                            ]
+                                        ]
+                                    },
+                                    "httpMethod": "POST",
+                                    "type": "aws_proxy"
+                                }
+                            }
+                        }
+                    },
+                    "definitions": {
+                        "Empty": {
+                            "type": "object",
+                            "title": "Empty Schema"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "Outputs": {
+        "LambdaExecutionRoleArn": {
+            "Description": "Lambada Execution Role ARN",
+            "Value": {
+                "Fn::GetAtt": [
+                    "LambadaExecutionRole",
+                    "Arn"
+                ]
+            }
+        },
+        "LambdaFunctionArn": {
+            "Description": "Lambada Function ARN",
+            "Value": {
+                "Fn::GetAtt": [
+                    "LambdaFunction",
+                    "Arn"
+                ]
+            }
+        },
+        "APIGatewayRoot": {
+            "Description": "API Gateway Function ARN",
+            "Value": {
+                "Ref": "ApiGatewayApi"
+            }
+        }
+    }
+}

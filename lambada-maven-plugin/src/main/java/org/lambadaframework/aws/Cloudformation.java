@@ -6,292 +6,20 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cloudformation.AmazonCloudFormation;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.*;
+import com.amazonaws.util.IOUtils;
+
 import org.lambadaframework.deployer.Deployment;
 
+import java.io.IOException;
 import java.util.List;
 
 public class Cloudformation extends AWSTools {
 
-    private final static String CLOUDFORMATION_TEMPLATE = "{\n" +
-            "  \"AWSTemplateFormatVersion\": \"2010-09-09\",\n" +
-            "  \"Description\": \"\",\n" +
-            "  \"Parameters\": {\n" +
-            "    \"LambdaMemorySize\": {\n" +
-            "      \"Type\": \"Number\",\n" +
-            "      \"Default\": \"128\",\n" +
-            "      \"Description\": \"AWS Lambda Function Maximum Allowed Memory.\"\n" +
-            "    },\n" +
-            "    \"LambdaMaximumExecutionTime\": {\n" +
-            "      \"Type\": \"Number\",\n" +
-            "      \"Default\": \"3\",\n" +
-            "      \"Description\": \"AWS Lambda Function Maximum Execution Time (seconds).\"\n" +
-            "    },\n" +
-            "    \"DeploymentS3Bucket\": {\n" +
-            "      \"Description\": \"Deployment S3 Bucket is where project is deployed after mvn deploy command.\",\n" +
-            "      \"Type\": \"String\",\n" +
-            "      \"MinLength\": \"3\",\n" +
-            "      \"MaxLength\": \"63\"\n" +
-            "    },\n" +
-            "    \"DeploymentS3Key\": {\n" +
-            "      \"Description\": \"Deployment S3 Key is the S3 Path where project is deployed after mvn deploy command.\",\n" +
-            "      \"Type\": \"String\",\n" +
-            "      \"MinLength\": \"1\"\n" +
-            "    },\n" +
-            "    \"LambdaDescription\": {\n" +
-            "      \"Description\": \"Lambda Description\",\n" +
-            "      \"Type\": \"String\",\n" +
-            "      \"MinLength\": \"1\"\n" +
-            "    },\n" +
-            "    \"LambdaExecutionRoleManagedPolicyARNs\": {\n" +
-            "      \"Description\": \"Managed Policy ARNs for Lambda Execution IAM Role\",\n" +
-            "      \"Type\": \"CommaDelimitedList\",\n" +
-            "      \"Default\": \"arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole\"\n" +
-            "    },\n" +
-            "    \"SecurityGroupIds\": {\n" +
-            "      \"Description\": \"Lambda VPC Security Group Ids\",\n" +
-            "      \"Type\": \"CommaDelimitedList\",\n" +
-            "      \"Default\": \"\"\n" +
-            "    },\n" +
-            "    \"SubnetIds\": {\n" +
-            "      \"Description\": \"Lambda VPC Subnet Ids\",\n" +
-            "      \"Type\": \"CommaDelimitedList\",\n" +
-            "      \"Default\": \"\"\n" +
-            "    }\n" +
-            "  },\n" +
-            "  \"Conditions\": {\n" +
-            "    \"UseVpcForLambda\": {\n" +
-            "      \"Fn::Not\": [\n" +
-            "        {\n" +
-            "          \"Fn::And\": [\n" +
-            "            {\n" +
-            "              \"Fn::Equals\": [\n" +
-            "                {\n" +
-            "                  \"Fn::Join\": [\n" +
-            "                    \",\",\n" +
-            "                    {\n" +
-            "                      \"Ref\": \"SubnetIds\"\n" +
-            "                    }\n" +
-            "                  ]\n" +
-            "                },\n" +
-            "                \"\"\n" +
-            "              ]\n" +
-            "            },\n" +
-            "            {\n" +
-            "              \"Fn::Equals\": [\n" +
-            "                {\n" +
-            "                  \"Fn::Join\": [\n" +
-            "                    \",\",\n" +
-            "                    {\n" +
-            "                      \"Ref\": \"SecurityGroupIds\"\n" +
-            "                    }\n" +
-            "                  ]\n" +
-            "                },\n" +
-            "                \"\"\n" +
-            "              ]\n" +
-            "            }\n" +
-            "          ]\n" +
-            "        }\n" +
-            "      ]\n" +
-            "    }\n" +
-            "  },\n" +
-            "  \"Mappings\": {\n" +
-            "  },\n" +
-            "  \"Resources\": {\n" +
-            "    \"LambadaExecutionRole\": {\n" +
-            "      \"Type\": \"AWS::IAM::Role\",\n" +
-            "      \"Properties\": {\n" +
-            "        \"AssumeRolePolicyDocument\": {\n" +
-            "          \"Version\": \"2012-10-17\",\n" +
-            "          \"Statement\": [\n" +
-            "            {\n" +
-            "              \"Effect\": \"Allow\",\n" +
-            "              \"Principal\": {\n" +
-            "                \"Service\": [\n" +
-            "                  \"lambda.amazonaws.com\",\n" +
-            "                  \"apigateway.amazonaws.com\"\n" +
-            "                ]\n" +
-            "              },\n" +
-            "              \"Action\": [\n" +
-            "                \"sts:AssumeRole\"\n" +
-            "              ]\n" +
-            "            }\n" +
-            "          ]\n" +
-            "        },\n" +
-            "        \"ManagedPolicyArns\": {\n" +
-            "          \"Ref\": \"LambdaExecutionRoleManagedPolicyARNs\"\n" +
-            "        }\n" +
-            "      }\n" +
-            "    },\n" +
-            "    \"LambadaExecutionPolicy\": {\n" +
-            "      \"Type\": \"AWS::IAM::Policy\",\n" +
-            "      \"Properties\": {\n" +
-            "        \"PolicyName\": \"${stage}-${project}-lambda\",\n" +
-            "        \"PolicyDocument\": {\n" +
-            "          \"Version\": \"2012-10-17\",\n" +
-            "          \"Statement\": [\n" +
-            "            {\n" +
-            "              \"Effect\": \"Allow\",\n" +
-            "              \"Action\": [\n" +
-            "                \"ec2:CreateNetworkInterface\",\n" +
-            "                \"ec2:DescribeNetworkInterfaces\",\n" +
-            "                \"ec2:DeleteNetworkInterface\"\n" +
-            "              ],\n" +
-            "              \"Resource\": \"*\"\n" +
-            "            },\n" +
-            "            {\n" +
-            "              \"Action\": [\n" +
-            "                \"logs:CreateLogGroup\",\n" +
-            "                \"logs:CreateLogStream\",\n" +
-            "                \"logs:PutLogEvents\"\n" +
-            "              ],\n" +
-            "              \"Effect\": \"Allow\",\n" +
-            "              \"Resource\": \"arn:aws:logs:*\"\n" +
-            "            },\n" +
-            "            {\n" +
-            "              \"Effect\": \"Allow\",\n" +
-            "              \"Action\": [\n" +
-            "                \"lambda:InvokeFunction\"\n" +
-            "              ],\n" +
-            "              \"Resource\": [\n" +
-            "                \"*\"\n" +
-            "              ]\n" +
-            "            },\n" +
-            "            {\n" +
-            "              \"Effect\": \"Allow\",\n" +
-            "              \"Action\": [\n" +
-            "                \"apigateway:*\",\n" +
-            "                \"iam:PassRole\"\n" +
-            "              ],\n" +
-            "              \"Resource\": [\n" +
-            "                \"*\"\n" +
-            "              ]\n" +
-            "            }\n" +
-            "          ]\n" +
-            "        },\n" +
-            "        \"Roles\": [\n" +
-            "          {\n" +
-            "            \"Ref\": \"LambadaExecutionRole\"\n" +
-            "          }\n" +
-            "        ]\n" +
-            "      }\n" +
-            "    },\n" +
-            "    \"LambdaPermissionForApiGateway\": {\n" +
-            "      \"Type\": \"AWS::Lambda::Permission\",\n" +
-            "      \"Properties\": {\n" +
-            "        \"Action\": \"lambda:InvokeFunction\",\n" +
-            "        \"FunctionName\": {\n" +
-            "          \"Fn::GetAtt\": [\n" +
-            "            \"LambdaFunction\",\n" +
-            "            \"Arn\"\n" +
-            "          ]\n" +
-            "        },\n" +
-            "        \"Principal\": \"apigateway.amazonaws.com\",\n" +
-            "        \"SourceArn\": {\n" +
-            "          \"Fn::Join\": [\n" +
-            "            \"\",\n" +
-            "            [\n" +
-            "              \"arn:aws:execute-api:\",\n" +
-            "              {\n" +
-            "                \"Ref\": \"AWS::Region\"\n" +
-            "              },\n" +
-            "              \":\",\n" +
-            "              {\n" +
-            "                \"Ref\": \"AWS::AccountId\"\n" +
-            "              },\n" +
-            "              \":*\"\n" +
-            "            ]\n" +
-            "          ]\n" +
-            "        }\n" +
-            "      }\n" +
-            "    },\n" +
-            "    \"LambdaFunction\": {\n" +
-            "      \"Type\": \"AWS::Lambda::Function\",\n" +
-            "      \"Properties\": {\n" +
-            "        \"Handler\": \"org.lambadaframework.runtime.Handler\",\n" +
-            "        \"Role\": {\n" +
-            "          \"Fn::GetAtt\": [\n" +
-            "            \"LambadaExecutionRole\",\n" +
-            "            \"Arn\"\n" +
-            "          ]\n" +
-            "        },\n" +
-            "        \"Code\": {\n" +
-            "          \"S3Bucket\": {\n" +
-            "            \"Ref\": \"DeploymentS3Bucket\"\n" +
-            "          },\n" +
-            "          \"S3Key\": {\n" +
-            "            \"Ref\": \"DeploymentS3Key\"\n" +
-            "          }\n" +
-            "        },\n" +
-            "        \"Runtime\": \"java8\",\n" +
-            "        \"Timeout\": {\n" +
-            "          \"Ref\": \"LambdaMaximumExecutionTime\"\n" +
-            "        },\n" +
-            "        \"MemorySize\": {\n" +
-            "          \"Ref\": \"LambdaMemorySize\"\n" +
-            "        },\n" +
-            "        \"Description\": {\n" +
-            "          \"Ref\": \"LambdaDescription\"\n" +
-            "        },\n" +
-            "        \"VpcConfig\": {\n" +
-            "          \"Fn::If\": [\n" +
-            "            \"UseVpcForLambda\",\n" +
-            "            {\n" +
-            "              \"SecurityGroupIds\": {\n" +
-            "                \"Fn::If\": [\n" +
-            "                  \"UseVpcForLambda\",\n" +
-            "                  {\n" +
-            "                    \"Ref\": \"SecurityGroupIds\"\n" +
-            "                  },\n" +
-            "                  {\n" +
-            "                    \"Ref\": \"AWS::NoValue\"\n" +
-            "                  }\n" +
-            "                ]\n" +
-            "              },\n" +
-            "              \"SubnetIds\": {\n" +
-            "                \"Fn::If\": [\n" +
-            "                  \"UseVpcForLambda\",\n" +
-            "                  {\n" +
-            "                    \"Ref\": \"SubnetIds\"\n" +
-            "                  },\n" +
-            "                  {\n" +
-            "                    \"Ref\": \"AWS::NoValue\"\n" +
-            "                  }\n" +
-            "                ]\n" +
-            "              }\n" +
-            "            },\n" +
-            "            {\n" +
-            "              \"Ref\": \"AWS::NoValue\"\n" +
-            "            }\n" +
-            "          ]\n" +
-            "        }\n" +
-            "      }\n" +
-            "    }\n" +
-            "  },\n" +
-            "  \"Outputs\": {\n" +
-            "    \"LambdaExecutionRoleArn\": {\n" +
-            "      \"Description\": \"Lambada Execution Role ARN\",\n" +
-            "      \"Value\": {\n" +
-            "        \"Fn::GetAtt\": [\n" +
-            "          \"LambadaExecutionRole\",\n" +
-            "          \"Arn\"\n" +
-            "        ]\n" +
-            "      }\n" +
-            "    },\n" +
-            "    \"LambdaFunctionArn\": {\n" +
-            "      \"Description\": \"Lambada Function ARN\",\n" +
-            "      \"Value\": {\n" +
-            "        \"Fn::GetAtt\": [\n" +
-            "          \"LambdaFunction\",\n" +
-            "          \"Arn\"\n" +
-            "        ]\n" +
-            "      }\n" +
-            "    }\n" +
-            "  }\n" +
-            "}";
-
-
+    
     private final static String LAMBDA_EXECUTION_IAM_RESOURCE_NAME = "LambdaExecutionRoleArn";
     private final static String LAMBDA_EXECUTION_NAME = "LambdaFunctionArn";
+    private final static String API_GATEWAY_ROOT = "APIGatewayRoot";
+
 
     private AmazonCloudFormationClient cloudformationClient;
 
@@ -310,10 +38,20 @@ public class Cloudformation extends AWSTools {
     }
 
     public String getCloudformationTemplate() {
-        return CLOUDFORMATION_TEMPLATE
-                .replace("${project}", deployment.getProjectName())
-                .replace("${stage}", deployment.getStage());
-
+        return getTemplateFromFile();
+    }
+    
+    public String getTemplateFromFile() {
+    	String template = "";
+    	try {
+    		template = IOUtils.toString(
+			Thread.currentThread().getContextClassLoader().getResourceAsStream("cloudformation.json"));
+			log.info("Loaded the CF template from file");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	return template;
     }
 
 
@@ -322,8 +60,18 @@ public class Cloudformation extends AWSTools {
         protected String lambdaExecutionRole;
 
         protected String lambdaFunctionArn;
+        
+        protected String apiGatewayId;
 
-        public String getLambdaExecutionRole() {
+        public String getApiGatewayId() {
+			return apiGatewayId;
+		}
+
+		public void setApiGatewayId(String apiGatewayId) {
+			this.apiGatewayId = apiGatewayId;
+		}
+
+		public String getLambdaExecutionRole() {
             return lambdaExecutionRole;
         }
 
@@ -411,6 +159,10 @@ public class Cloudformation extends AWSTools {
                     if (output.getOutputKey().equals(LAMBDA_EXECUTION_NAME)) {
                         cloudFormationOutput.setLambdaFunctionArn(output.getOutputValue());
                     }
+                    
+                    if (output.getOutputKey().equals(API_GATEWAY_ROOT)) {
+                        cloudFormationOutput.setApiGatewayId(output.getOutputValue());
+                    }
                 });
                 return cloudFormationOutput;
             }
@@ -421,15 +173,16 @@ public class Cloudformation extends AWSTools {
 
 
     public CloudFormationOutput createOrUpdateStack() throws Exception {
-        log.info("Creating or updating Cloudformation stack");
+        log.info("Creating or updating Cloudformation stack" + getStackName());
+        log.info("CF Parammeters = 	" + deployment.getCloudFormationParameters());
         try {
             createStack(deployment, getCloudformationTemplate());
         } catch (AlreadyExistsException alreadyExistsException) {
-            log.info("Stack already exists. Trying to update.");
+            log.info(getStackName() + "Stack already exists. Trying to update.");
             try {
                 updateStack(deployment, getCloudformationTemplate());
             } catch (AmazonServiceException noUpdateNeededException) {
-                log.info("No updates needed for Cloudformation. Resuming deployment.");
+                log.info("No updates needed for Cloudformation stack" + getStackName() + ".Resuming deployment.");
             }
         }
 
@@ -459,6 +212,10 @@ public class Cloudformation extends AWSTools {
         updateStackRequest.withCapabilities(Capability.CAPABILITY_IAM);
         getCloudFormationClient().updateStack(updateStackRequest);
         log.info("Stack update completed, the stack " + templateName + " completed with " + waitForCompletion());
+    }
+    
+    private String getStackName() {
+    	return  " [" + deployment.getCloudFormationStackName() + "] " ;
     }
 
 }

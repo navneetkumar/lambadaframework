@@ -5,6 +5,7 @@ import com.amazonaws.regions.Regions;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.lambadaframework.AbstractMojoPlugin;
 import org.lambadaframework.aws.LambdaFunction;
+import org.lambadaframework.aws.StaticApiGateway;
 import org.lambadaframework.aws.ApiGateway;
 import org.lambadaframework.aws.Cloudformation;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -34,6 +35,16 @@ public class LambadaDeployer extends AbstractMojoPlugin {
             throw new RuntimeException(region + " is not a AWS region. Please select a valid one.");
         }
     }
+    
+    protected void showInfo(Deployment deployment) {
+    	
+    	getLog().info("Group Id: " + mavenProject.getGroupId());
+        getLog().info("Artifact Id: " + mavenProject.getArtifactId());
+        getLog().info("Version to deploy: " + deployment.getVersion());
+        getLog().info("Stage to deploy: " + stageToDeploy);
+        getLog().info("Region to deploy: " + regionToDeploy);
+        getLog().info(LOG_SEPERATOR);
+    }
 
 
     /**
@@ -53,33 +64,24 @@ public class LambadaDeployer extends AbstractMojoPlugin {
             getLog().info("Updated Deployment to AWS Lambda and Gateway is starting.");
 
             checkRegion(regionToDeploy);
-            getLog().info("Group Id: " + mavenProject.getGroupId());
-            getLog().info("Artifact Id: " + mavenProject.getArtifactId());
-            getLog().info("Version to deploy: " + deployment.getVersion());
-            getLog().info("Stage to deploy: " + stageToDeploy);
-            getLog().info("Region to deploy: " + regionToDeploy);
+            showInfo(deployment);
+            
+            // Set up Cloudformation
+            Cloudformation.CloudFormationOutput cloudFormationOutput = executeCloudFormation();
+            
+            // Set up VPC of Lambda, create new version
+            getLog().info("LAMBDA");
+            LambdaFunction lambdaFunction = new LambdaFunction(cloudFormationOutput.getLambdaFunctionArn(), deployment);
+            lambdaFunction.setLog(getLog());
+            String functionAlias = lambdaFunction.deployLatestVersion();
             getLog().info(LOG_SEPERATOR);
-
-            getLog().info("CLOUDFORMATION");
-            Cloudformation.CloudFormationOutput cloudFormationOutput = applyCloudFormation(deployment);
-            getLog().info("Deployed IAM Role: " + cloudFormationOutput.getLambdaExecutionRole());
-            getLog().info("Deployed Lambda Function ARN: " + cloudFormationOutput.getLambdaFunctionArn());
+            
+            // Set up APIGateway, create new version
+            getLog().info("API GATEWAY");
+            StaticApiGateway apiGateway = new StaticApiGateway(deployment, functionAlias, cloudFormationOutput.getApiGatewayId());
+            apiGateway.setLog(getLog());
+            apiGateway.deployEndpoints();
             getLog().info(LOG_SEPERATOR);
-
-            /**
-             * Set up VPC of Lambda, create new version
-             */
-//            getLog().info("LAMBDA");
-//            LambdaFunction lambdaFunction = new LambdaFunction(cloudFormationOutput.getLambdaFunctionArn(), deployment);
-//            lambdaFunction.setLog(getLog());
-//            String functionArn = lambdaFunction.deployLatestVersion();
-//            getLog().info(LOG_SEPERATOR);
-//
-//            getLog().info("API GATEWAY");
-//            ApiGateway apiGateway = new ApiGateway(deployment, functionArn, cloudFormationOutput.getLambdaExecutionRole());
-//            apiGateway.setLog(getLog());
-//            apiGateway.deployEndpoints();
-//            getLog().info(LOG_SEPERATOR);
 
 
         } catch (Exception e) {

@@ -97,17 +97,20 @@ public class LambdaFunction extends AWSTools {
          * Create alias if not exist
          */
         createAlias(functionArn, deployment.getVersion(), publishVersionResult.getVersion());
-        String aliasArn = setAliasVersion(functionArn, deployment.getVersion(), publishVersionResult.getVersion());
+        UpdateAliasResult aliasResult = setAliasVersion(functionArn, deployment.getVersion(), publishVersionResult.getVersion());
+        String aliasArn = aliasResult.getAliasArn();
+        String aliasName = aliasResult.getName();
 
         if (log != null) {
             log.info(publishVersionResult.getVersion() + " has been marked as " + deployment.getVersion());
-            log.info("Alias ARN to be used in API Gateway is: " + aliasArn);
+            log.info("Alias ARN has been created: " + aliasArn);
+            log.info("Alias to be updated in stage variable " + aliasName);
         }
 
 
         givePermissionForApiGatewayEndpoint(aliasArn);
 
-        return aliasArn;
+        return aliasName;
     }
 
 
@@ -134,13 +137,13 @@ public class LambdaFunction extends AWSTools {
         }
     }
 
-    private String setAliasVersion(String functionArn, String version, String functionVersion) {
+    private UpdateAliasResult setAliasVersion(String functionArn, String version, String functionVersion) {
         UpdateAliasRequest updateAliasRequest = new UpdateAliasRequest();
         updateAliasRequest.setFunctionVersion(functionVersion);
         updateAliasRequest.setFunctionName(functionArn);
         updateAliasRequest.setName(createLambdaFriendlyVersionName(version));
         UpdateAliasResult updateAliasResult = getLambdaClient().updateAlias(updateAliasRequest);
-        return updateAliasResult.getAliasArn();
+        return updateAliasResult;
     }
 
     public void givePermissionForApiGatewayEndpoint(String aliasArn) {

@@ -1,9 +1,11 @@
 package org.lambadaframework;
 
 import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.lambadaframework.aws.Cloudformation;
+import org.lambadaframework.aws.Cloudformation.CloudFormationOutput;
 import org.lambadaframework.deployer.Deployment;
 
 import java.util.List;
@@ -119,5 +121,18 @@ public abstract class AbstractMojoPlugin extends AbstractMojo {
         Cloudformation cloudformation = new Cloudformation(deployment);
         cloudformation.setLog(getLog());
         return cloudformation.createOrUpdateStack();
+    }
+    
+    protected CloudFormationOutput executeCloudFormation() throws Exception {
+          getLog().info(LOG_SEPERATOR);          
+          getLog().info("CLOUDFORMATION");
+          getLog().info(LOG_SEPERATOR);
+          Cloudformation.CloudFormationOutput cloudFormationOutput = applyCloudFormation(getDeployment());
+          getLog().info("Deployed IAM Role: " + cloudFormationOutput.getLambdaExecutionRole());
+          getLog().info("Deployed Lambda Function ARN: " + cloudFormationOutput.getLambdaFunctionArn());
+          getLog().info("Deployed API gateway-id is : " + cloudFormationOutput.getApiGatewayId());
+          getLog().info(LOG_SEPERATOR);
+          return cloudFormationOutput;
+          
     }
 }

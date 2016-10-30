@@ -52,7 +52,9 @@ public class Deployment {
     public static final String S3_DEPLOYMENT_KEY_KEY = "DeploymentS3Key";
 
     public static final String LAMBDA_DESCRIPTION_KEY = "LambdaDescription";
-
+    public static final String CF_PROJECT_KEY = "Project";
+    public static final String CF_STAGE_KEY = "Stage";
+    
     protected Log log;
 
     public Deployment(MavenProject project,
@@ -81,6 +83,10 @@ public class Deployment {
     public String getProjectName() {
         return project.getGroupId() + "." + project.getArtifactId();
     }
+    
+    public String getProjectDisplayName() {
+        return project.getArtifactId();
+    }
 
     /**
      * Sets default Cloudformation Parameters
@@ -89,6 +95,8 @@ public class Deployment {
 
         properties.setProperty(S3_DEPLOYMENT_BUCKET_KEY, getBucketName());
         properties.setProperty(S3_DEPLOYMENT_KEY_KEY, getJarFileLocationOnS3(getVersion()));
+        properties.setProperty(CF_PROJECT_KEY, getProjectDisplayName());
+        properties.setProperty(CF_STAGE_KEY, getStage());
 
         properties.setProperty(LAMBDA_DESCRIPTION_KEY, getLambdaDescription());
 
@@ -99,6 +107,8 @@ public class Deployment {
         if (properties.getProperty(LAMBDA_MEMORY_SIZE_KEY) == null) {
             properties.setProperty(LAMBDA_MEMORY_SIZE_KEY, Integer.toString(LAMBDA_MEMORY_SIZE_DEFAULT_VALUE));
         }
+        
+        
 
     }
 
