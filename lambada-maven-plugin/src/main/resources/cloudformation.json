@@ -215,7 +215,7 @@
         "LambdaFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
-                "Handler": "org.lambadaframework.runtime.Handler",
+                "Handler": "org.lambadaframework.webruntime.Handler",
                 "Role": {
                     "Fn::GetAtt": [
                         "LambadaExecutionRole",

@@ -36,10 +36,10 @@ public class Deployment {
     private static final String deploymentBucketPropertyName = "deployment.bucket";
 
     public static final String LAMBDA_MAXIMUM_EXECUTION_TIME_KEY = "LambdaMaximumExecutionTime";
-    public static final int LAMBDA_MAXIMUM_EXECUTION_TIME_DEFAULT_VALUE = 3;
+    public static final int LAMBDA_MAXIMUM_EXECUTION_TIME_DEFAULT_VALUE = 60;
 
     public static final String LAMBDA_MEMORY_SIZE_KEY = "LambdaMemorySize";
-    public static final int LAMBDA_MEMORY_SIZE_DEFAULT_VALUE = 128;
+    public static final int LAMBDA_MEMORY_SIZE_DEFAULT_VALUE = 512;
 
     public static final String LAMBDA_EXECUTION_ROLE_POLICY_KEY = "LambdaExecutionRoleManagedPolicyARNs";
 
