@@ -55,7 +55,7 @@ public class Handler implements RequestStreamHandler {
     	
     	ObjectMapper mapper = new ObjectMapper();
     	APIRequest apiRequest = (APIRequest) mapper.readValue(inputStream, APIRequest.class);
-    	System.out.println("Received request  = " + apiRequest.toString());
+    	System.out.println("Received JSON request  = " + apiRequest.toString());
 	
     	
     	Request jettyRequest = httpClient.newRequest(JettyTestServer.BASEURL);
@@ -67,7 +67,7 @@ public class Handler implements RequestStreamHandler {
     	logger.debug("http response = " + apiResponse.toString());
     	
     	String jsonResponse = mapper.writeValueAsString(apiResponse);
-    	logger.debug("json response = " + apiResponse.toString());
+    	System.out.println("Returned JSON response = " + apiResponse.toString());
     	
     	outputStream.write(jsonResponse.getBytes(Charset.forName("UTF-8")));
   

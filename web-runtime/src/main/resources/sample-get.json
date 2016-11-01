@@ -1,6 +1,6 @@
 {
 	"resource": "/{proxy+}",
-	"path": "/api/provisioning/pairingcodes/KQ9JH",
+	"path": "/api/resources/rooms/6dda0d68-c729-4430-8fa4-8b3e82335e12",
 	"httpMethod": "GET",
 	"headers": {
 		"Accept": "*/*",
@@ -21,7 +21,8 @@
 		"X-Amz-Cf-Id": "0I461Y6hpLyBwNDgTf1IoO4QRxv3-R9rQh8J9oW-p7iz0fVyaKgB3Q==",
 		"X-Forwarded-For": "223.227.51.1, 54.239.160.6",
 		"X-Forwarded-Port": "443",
-		"X-Forwarded-Proto": "https"
+		"X-Forwarded-Proto": "https",
+		"Authorization": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjoiUFJJU00iLCJzdWIiOiIxYjkxZWU3OC02ZTUxLTQ4OWQtYWZjMy0xYzk5NjNiNWQ2MDQiLCJleHAiOjE0NzkxNjQzNTcsImVudGVycHJpc2VJZCI6IjMxIn0.G9DbKUk4EPVLr3IazJ2l532sLSnMEdOCY3H5qMjceIM3U4NT0ERJJPYKwa1Rf8du3fndczQFEsw9B-Ec0CtHGw"
 	},
 	"queryStringParameters": {
 		"pairingKey": "vX8m0xShGagOdpThMPSgEPc6A8tfXxBudeDcPdAj4dgjpw6Fm8qyd3eEJB8DERXf7JzxblM4HCFIoX0Y8PCrDtIljpxcFGiwVsXwoQV7JXBEALlAhrd86k4hBWzyBLI5ruRvmiB6CuevZLCrwONw2iVo7Y162Apg1GqPoYKC6TnCf4S7FhuXqrULPK5QZPunE4NdKyn1TzE4IxbxtAHPBbmQHXP160asMd5TCNf0XBmm4XltRkGm00XZx7Xi33xc"

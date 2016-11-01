@@ -82,7 +82,7 @@ public class Main {
     }
 	
 	private static String getRequestFile() {
-		return "sample-post.json";
+		return "sample-get.json";
 	}
 	
 	private static InputStream getInput() throws Exception {

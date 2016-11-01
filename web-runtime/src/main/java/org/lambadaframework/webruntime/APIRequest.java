@@ -67,7 +67,12 @@ public class APIRequest {
 	}
 	
 	public Request copyRequest(Request request) {
-		return request.method(httpMethod).path(path);
+		Request updatedRequest = request.method(httpMethod).path(path);
+		for (Map.Entry<String, String> header : headers.entrySet())
+		{
+		    updatedRequest.header(header.getKey(), header.getValue());
+		}
+		return updatedRequest;
 	}
 	
 	@Override
