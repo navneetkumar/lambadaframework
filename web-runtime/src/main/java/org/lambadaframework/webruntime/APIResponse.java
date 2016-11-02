@@ -25,6 +25,11 @@ public class APIResponse {
 				
 	}
 	
+	public APIResponse(String body, int statusCode) {
+		this.body = body;
+		this.statusCode = statusCode;				
+	}
+	
 
 	public String getBody() {
 		return body;

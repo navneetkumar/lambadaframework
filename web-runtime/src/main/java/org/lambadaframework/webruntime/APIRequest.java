@@ -71,17 +71,23 @@ public class APIRequest {
 	public Request copyRequest(Request request) {
 		Request updatedRequest = request
 				.method(httpMethod)
-				.path(path)
-				.content(new StringContentProvider(body));
-
-		for (Map.Entry<String, String> header : headers.entrySet())
-		{
-		    updatedRequest.header(header.getKey(), header.getValue());
+				.path(path);
+				
+		if(body != null) {
+			updatedRequest.content(new StringContentProvider(body));
+		}
+		if(headers != null)  {
+			for (Map.Entry<String, String> header : headers.entrySet())
+			{
+			    updatedRequest.header(header.getKey(), header.getValue());
+			}
 		}
 		
-		for (Map.Entry<String, String> queryParam : queryStringParameters.entrySet())
-		{
-			updatedRequest.param(queryParam.getKey(), queryParam.getValue());
+		if(queryStringParameters != null) {
+			for (Map.Entry<String, String> queryParam : queryStringParameters.entrySet())
+			{
+				updatedRequest.param(queryParam.getKey(), queryParam.getValue());
+			}
 		}
 		
 		return updatedRequest;

@@ -11,6 +11,7 @@ import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
 
+import com.amazonaws.Response;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,29 +48,40 @@ public class Handler implements RequestStreamHandler {
     
     
     public void proxyRequest(InputStream inputStream, OutputStream outputStream) throws Exception {
-    	HttpClient httpClient = new HttpClient();
-    	httpClient.setFollowRedirects(false);
-    	httpClient.start();
-    	logger.debug("sending request to server = " + JettyTestServer.BASEURL);
+    	try {
+    		HttpClient httpClient = new HttpClient();
+        	httpClient.setFollowRedirects(false);
+        	httpClient.start();
+        	logger.debug("sending request to server = " + JettyTestServer.BASEURL);
+        	
+        	
+        	ObjectMapper mapper = new ObjectMapper();
+        	APIRequest apiRequest = (APIRequest) mapper.readValue(inputStream, APIRequest.class);
+        	System.out.println("Received JSON request  = " + apiRequest.toString());
     	
+        	
+        	Request jettyRequest = httpClient.newRequest(JettyTestServer.BASEURL);
+        	Request newRequest = apiRequest.copyRequest(jettyRequest);    	
+        	ContentResponse jettyResponse = newRequest.send();
+        	
+        	
+        	APIResponse apiResponse =  new APIResponse(jettyResponse);
+        	logger.debug("http response = " + apiResponse.toString());
+        	
+        	String jsonResponse = mapper.writeValueAsString(apiResponse);
+        	System.out.println("Returned JSON response = " + apiResponse.toString());
+        	
+        	outputStream.write(jsonResponse.getBytes(Charset.forName("UTF-8")));
+    	}
+    	catch  (Exception e) {
+    		logger.debug("error occured during proxy = " + e.getLocalizedMessage());
+    		e.printStackTrace();
+    		APIResponse exceptionResponse =  new APIResponse("Error In Proxy",500);
+    		String erroJsonResponse = new ObjectMapper().writeValueAsString(exceptionResponse);
+    		logger.debug("returning exception message = " + exceptionResponse.toString());
+    		outputStream.write(erroJsonResponse.getBytes(Charset.forName("UTF-8")));
+    	}
     	
-    	ObjectMapper mapper = new ObjectMapper();
-    	APIRequest apiRequest = (APIRequest) mapper.readValue(inputStream, APIRequest.class);
-    	System.out.println("Received JSON request  = " + apiRequest.toString());
-	
-    	
-    	Request jettyRequest = httpClient.newRequest(JettyTestServer.BASEURL);
-    	Request newRequest = apiRequest.copyRequest(jettyRequest);    	
-    	ContentResponse jettyResponse = newRequest.send();
-    	
-    	
-    	APIResponse apiResponse =  new APIResponse(jettyResponse);
-    	logger.debug("http response = " + apiResponse.toString());
-    	
-    	String jsonResponse = mapper.writeValueAsString(apiResponse);
-    	System.out.println("Returned JSON response = " + apiResponse.toString());
-    	
-    	outputStream.write(jsonResponse.getBytes(Charset.forName("UTF-8")));
   
     }
 
