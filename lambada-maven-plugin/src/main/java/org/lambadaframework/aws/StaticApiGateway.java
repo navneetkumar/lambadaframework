@@ -60,6 +60,7 @@ public class StaticApiGateway extends AWSTools {
             log.info("Creating new deployment");
         }
         log.info("Finding api with id = " + apiGatewayId);
+        String stageName = "release";
         Map<String, String> stageVariables = new HashMap<String, String>();
         stageVariables.put("functionAlias", functionAlias);
         log.info("Deploying api to lambda alias = " + functionAlias);    
@@ -67,7 +68,7 @@ public class StaticApiGateway extends AWSTools {
                 .withRestApiId(apiGatewayId)
                 .withDescription(deployment.getProjectName() + " v" + deployment.getVersion())
                 .withStageDescription(deployment.getStage())
-                .withStageName(deployment.getStage())
+                .withStageName(stageName)
                 .withVariables(stageVariables)
         );
 
@@ -81,7 +82,7 @@ public class StaticApiGateway extends AWSTools {
                 ".execute-api." +
                 deployment.getRegion() +
                 ".amazonaws.com/" +
-                deployment.getStage();
+                stageName;
 
 
         if (log != null) {

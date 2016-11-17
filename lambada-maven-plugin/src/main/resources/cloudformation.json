@@ -12,6 +12,11 @@
             "Type": "String",
             "MinLength": "1"
         },
+        "LambdaExecutionRoleARN": {
+            "Type": "String",
+            "Description": "AWS Lambda Execution Role",
+            "MinLength": "1"
+        },
         "LambdaMemorySize": {
             "Type": "Number",
             "Default": "128",
@@ -37,11 +42,6 @@
             "Description": "Lambda Description",
             "Type": "String",
             "MinLength": "1"
-        },
-        "LambdaExecutionRoleManagedPolicyARNs": {
-            "Description": "Managed Policy ARNs for Lambda Execution IAM Role",
-            "Type": "CommaDelimitedList",
-            "Default": "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
         },
         "SecurityGroupIds": {
             "Description": "Lambda VPC Security Group Ids",
@@ -92,97 +92,6 @@
     },
     "Mappings": {},
     "Resources": {
-        "LambadaExecutionRole": {
-            "Type": "AWS::IAM::Role",
-            "Properties": {
-                "AssumeRolePolicyDocument": {
-                    "Version": "2012-10-17",
-                    "Statement": [
-                        {
-                            "Effect": "Allow",
-                            "Principal": {
-                                "Service": [
-                                    "lambda.amazonaws.com",
-                                    "apigateway.amazonaws.com"
-                                ]
-                            },
-                            "Action": [
-                                "sts:AssumeRole"
-                            ]
-                        }
-                    ]
-                },
-                "ManagedPolicyArns": {
-                    "Ref": "LambdaExecutionRoleManagedPolicyARNs"
-                }
-            }
-        },
-        "LambadaExecutionPolicy": {
-            "Type": "AWS::IAM::Policy",
-            "Properties": {
-                "PolicyName": {
-                    "Fn::Join": [
-                        "-",
-                        [
-                            {
-                                "Ref": "Stage"
-                            },
-                            {
-                                "Ref": "Project"
-                            },
-                            "lambda"
-                        ]
-                    ]
-                },
-                "PolicyDocument": {
-                    "Version": "2012-10-17",
-                    "Statement": [
-                        {
-                            "Effect": "Allow",
-                            "Action": [
-                                "ec2:CreateNetworkInterface",
-                                "ec2:DescribeNetworkInterfaces",
-                                "ec2:DeleteNetworkInterface"
-                            ],
-                            "Resource": "*"
-                        },
-                        {
-                            "Action": [
-                                "logs:CreateLogGroup",
-                                "logs:CreateLogStream",
-                                "logs:PutLogEvents"
-                            ],
-                            "Effect": "Allow",
-                            "Resource": "arn:aws:logs:*"
-                        },
-                        {
-                            "Effect": "Allow",
-                            "Action": [
-                                "lambda:InvokeFunction"
-                            ],
-                            "Resource": [
-                                "*"
-                            ]
-                        },
-                        {
-                            "Effect": "Allow",
-                            "Action": [
-                                "apigateway:*",
-                                "iam:PassRole"
-                            ],
-                            "Resource": [
-                                "*"
-                            ]
-                        }
-                    ]
-                },
-                "Roles": [
-                    {
-                        "Ref": "LambadaExecutionRole"
-                    }
-                ]
-            }
-        },
         "LambdaPermissionForApiGateway": {
             "Type": "AWS::Lambda::Permission",
             "Properties": {
@@ -217,10 +126,7 @@
             "Properties": {
                 "Handler": "org.lambadaframework.webruntime.Handler",
                 "Role": {
-                    "Fn::GetAtt": [
-                        "LambadaExecutionRole",
-                        "Arn"
-                    ]
+                    "Ref": "LambdaExecutionRoleARN"
                 },
                 "Code": {
                     "S3Bucket": {
@@ -283,7 +189,7 @@
                     "info": {
                         "version": "2016-10-17T09:17:50Z",
                         "title": {
-                            "Ref": "Project"
+                            "Ref": "Stage"
                         }
                     },
                     "basePath": "/prod",
@@ -471,15 +377,6 @@
         }
     },
     "Outputs": {
-        "LambdaExecutionRoleArn": {
-            "Description": "Lambada Execution Role ARN",
-            "Value": {
-                "Fn::GetAtt": [
-                    "LambadaExecutionRole",
-                    "Arn"
-                ]
-            }
-        },
         "LambdaFunctionArn": {
             "Description": "Lambada Function ARN",
             "Value": {

@@ -42,6 +42,9 @@ public class Deployment {
     public static final int LAMBDA_MEMORY_SIZE_DEFAULT_VALUE = 512;
 
     public static final String LAMBDA_EXECUTION_ROLE_POLICY_KEY = "LambdaExecutionRoleManagedPolicyARNs";
+    
+    public static final String LAMBDA_EXECUTION_ROLE_ARN_KEY = "LambdaExecutionRoleARN";
+
 
     public static final String LAMBDA_VPC_SUBNETS_KEY = "SubnetIds";
 
@@ -131,7 +134,7 @@ public class Deployment {
      * @return CF Stack Name
      */
     public String getCloudFormationStackName() {
-        return project.getArtifactId() + "-" + getStage();
+        return getStage();
     }
 
     public Collection<Parameter> getCloudFormationParameters() {
@@ -184,7 +187,7 @@ public class Deployment {
             throw new RuntimeException("Required version (" + version + ") does not exist on S3 bucket (s3://" + this.getBucketName() + "/" + bucketKey + ". Aborting.");
         }
         */
-
+        bucketKey = getStage() + "/" + bucketKey;
         return bucketKey;
     }
 

@@ -55,6 +55,9 @@ public abstract class AbstractMojoPlugin extends AbstractMojo {
 
     @Parameter
     public List<String> lambdaSecurityGroups;
+    
+    @Parameter
+    public String lambdaExecutionRoleARN;
 
     @Parameter
     public List<String> lambdaSubnetIds;
@@ -82,6 +85,10 @@ public abstract class AbstractMojoPlugin extends AbstractMojo {
 
         if (lambdaExecutionRolePolicies != null) {
             cloudFormationParameters.setProperty(Deployment.LAMBDA_EXECUTION_ROLE_POLICY_KEY, String.join(",", lambdaExecutionRolePolicies));
+        }
+        
+        if (lambdaExecutionRoleARN != null) {
+            cloudFormationParameters.setProperty(Deployment.LAMBDA_EXECUTION_ROLE_ARN_KEY,lambdaExecutionRoleARN);
         }
 
 
